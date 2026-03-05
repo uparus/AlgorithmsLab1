@@ -1,84 +1,61 @@
 #include "searchSource.h"
-#include "statistic.h"
 #include <iostream>
 #include <vector>
 #include <functional>
-#include <algorithm>
 using namespace std;
 
-long long searchLinear(const vector<long long>&arr, long long key,Statistic& stats) {
-    for (long long i = 0; i < arr.size(); i++) {
-        stats.totalComparisons++;
-        stats.elementComparisons++;
-        if (arr[i] == key) {
-            return i;
+
+void printArray(const vector<vector<int>>& matrix) {
+    for (int i = 0; i < matrix.size(); i++) {
+        for (int j = 0; j < matrix[i].size(); j++) {
+            cout << matrix[i][j] << " ";
+        }
+        cout << endl;
+    }
+}
+void initVector(vector<vector<int>>& matrix) {
+    for (int i = 0; i < matrix.size(); i++) {
+        for (int j = 0; j < matrix[i].size(); j++) {
+            matrix[i][j] = rand() % 100;
         }
     }
-    return -1;
 }
-long long searchBarrier(vector<long long>arr, long long key,Statistic& stats) {
-    arr.push_back(key);
-    long long i = 0;
 
-    while (arr[i] != key) {
+pair<int, int> linearSearch(vector<vector<int>>& matrix, int key) {
+    for (int i = 0; i < matrix.size(); i++) {
+        for (int j = 0; j < matrix[i].size(); j++) {
+            if (matrix[i][j] == key) {
+                return {i,j};
+            }
+        }
+    }
+    return {-1,-1};
+
+}
+pair<int, int> linearSearchBarrier(vector<vector<int>>& matrix, int key) {
+    int rows = matrix.size();
+    vector<int>newRow(matrix[0].size(), key);
+    matrix.push_back(newRow);
+    cout << endl;
+    for (int i = 0; i < matrix.size(); i++) {
+        for (int j = 0; j < matrix[0].size(); j++) {
+            cout << matrix[i][j] << " ";
+        }
+        cout << endl;
+    }
+
+    int i = 0;
+    int j = 0;
+    while (matrix[i][j] != key) {
+        while (i != matrix.size() && matrix[i][j] != key) j++;
         i++;
-        stats.elementComparisons++;
-        stats.totalComparisons++;
     }
+    matrix.erase(matrix.begin() + rows);
 
-    if (i == arr.size() - 1) return -1;
-
-    return i;
-}
-void printArray(const vector<long long>& arr) {
-    for (auto& element : arr) cout << element << " ";
-}
-void initVector(vector<long long>& arr) {
-    for (long long i = 0; i < arr.size(); i++) {
-        arr[i] = rand() % 1000000000 + 1;
-    }
-    sort(arr.begin(), arr.end());
-}
-
-long long binSearch(const vector<long long>&arr, long long key,Statistic& stats) {
-    long long left = 0;
-    long long right = arr.size() - 1;
-
-    while (left <= right) {
-        long long middle = (left+right)/2;
-
-        if (arr[middle] == key) return middle;
-
-        stats.totalComparisons++;
-        stats.elementComparisons++;
-
-        if (key < arr[middle]) {
-            right = middle - 1;
-            stats.totalComparisons++;
-        }else {
-            left = middle + 1;
-            stats.totalComparisons++;
-        }
-    }
-    return -1;
-}
-long long binSearchRecursive(const vector<long long>&arr, long long key, long long left, long long right,Statistic& stats) {
-
-    if ( left > right) stats.totalComparisons++; return -1;
-
-    long long middle = (right+ left) / 2;
-
-    if (arr[middle] == key) return middle;
-
-    stats.elementComparisons++;
-    stats.totalComparisons++;
-
-    if (key < arr[middle]) {
-        stats.totalComparisons++;
-        return binSearchRecursive(arr, key, left, middle - 1, stats);
+    if (i != rows) {
+        return { i,j };
     }
     else {
-        stats.totalComparisons++;
-        return binSearchRecursive(arr, key, middle + 1, right, stats);
+        return { -1,-1 };
     }
 }
