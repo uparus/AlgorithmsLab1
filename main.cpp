@@ -9,7 +9,7 @@
 #include "searchSource.h"
 #include "statistic.h"
 #include "searchSourceTime.h"
-using namespace std;
+//using namespace std;
 using namespace chrono;
 
 double measureTime(function<long long()> func);
@@ -31,55 +31,63 @@ int main() {
 
     Statistic stats;
 
+    vector<vector<double>>result(4, vector<double>(12,0));
+    int i = 0;
     for (long long key : keys) {
-        fout << "\nkey: " << key << endl;
-
+        int j = 0;
         stats.reset();
         long long linearIndex = searchLinear(arr, key, stats);
-        long long linearIndexTime = searchLinear(arr, key);
         double linearTime = measureTime([&]() {
             return searchLinear(arr, key);
         });
-        fout << "Linear\n";
-        fout << "Total: " << stats.totalComparisons << " "
-             << "Element: " << stats.elementComparisons << " "
-             << "Time: " << linearTime << "\n";
+        result[i][j++] = stats.totalComparisons;
+        result[i][j++] = stats.elementComparisons;
+        result[i][j++] = linearTime;
 
         stats.reset();
         long long barrierIndex = searchBarrier(arr, key, stats);
-        long long barrierIndexTime = searchBarrier(arr, key);
         double barrierTime = measureTime([&]() {
             return searchBarrier(arr, key);
         });
-        fout << "Barrier\n";
-        fout << "Total: " << stats.totalComparisons << " "
-             << "Element: " << stats.elementComparisons << " "
-             << "Time: " << barrierTime << "\n";
+        result[i][j++] = stats.totalComparisons;
+        result[i][j++] = stats.elementComparisons;
+        result[i][j++] = linearTime;
 
         stats.reset();
         long long binaryIndex = binSearch(arr, key, stats);
-        long long binaryIndexTime = binSearch(arr, key);
         double binaryTime = measureTime([&]() {
             return binSearch(arr, key);
         });
-        fout << "Binary\n";
-        fout << "Total: " << stats.totalComparisons << " "
-             << "Element: " << stats.elementComparisons << " "
-             << "Time: " << binaryTime << "\n";
+        result[i][j++] = stats.totalComparisons;
+        result[i][j++] = stats.elementComparisons;
+        result[i][j++] = linearTime;
 
         stats.reset();
         long long recIndex = binSearchRecursive(arr, key, 0, SIZE - 1, stats);
-        long long recIndexTime = binSearchRecursive(arr, key, 0, SIZE - 1);
         double recTime = measureTime([&]() {
             return binSearchRecursive(arr, key, 0, SIZE - 1);
         });
-        fout << "Binary Recursive\n";
-        fout << "Total: " << stats.totalComparisons << " "
-             << "Element: " << stats.elementComparisons << " "
-             << "Time: " << recTime << "\n";
+        result[i][j++] = stats.totalComparisons;
+        result[i][j++] = stats.elementComparisons;
+        result[i][j] = linearTime;
+        i++;
     }
 
+    for (int i = 0; i < result.size(); i++) {
+        for (int j = 0; j < result[0].size(); j++) {
+            std::cout << result[i][j] << "\t";
+        }
+        fout << endl;
+    }
+
+    for (int i = 0; i < result.size(); i++) {
+        for (int j = 0; j < result[0].size(); j++) {
+            fout << result[i][j] << "\t";
+        }
+        fout << endl;
+    }
     fout.close();
+    std::cout << "\nDone";
     return 0;
 }
 
@@ -92,7 +100,7 @@ double measureTime(function<long long()> func)
         func();
         auto end = high_resolution_clock::now();
 
-        total += duration<double>(end - start).count();
+        total += duration_cast<milliseconds>(end - start).count();
     }
     int avg = total / 10;
     return avg;
