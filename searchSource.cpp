@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <functional>
+#include <algorithm>
 using namespace std;
 
 long long searchLinear(const vector<long long>&arr, long long key,Statistic& stats) {
@@ -18,9 +19,6 @@ long long searchLinear(const vector<long long>&arr, long long key,Statistic& sta
 long long searchBarrier(vector<long long>arr, long long key,Statistic& stats) {
     arr.push_back(key);
     long long i = 0;
-
-    stats.elementComparisons++;
-    stats.totalComparisons++;
 
     while (arr[i] != key) {
         i++;
@@ -49,9 +47,6 @@ long long binSearch(const vector<long long>&arr, long long key,Statistic& stats)
     while (left <= right) {
         long long middle = (left+right)/2;
 
-        stats.elementComparisons++;
-        stats.totalComparisons++;
-
         if (arr[middle] == key) return middle;
 
         stats.totalComparisons++;
@@ -59,28 +54,31 @@ long long binSearch(const vector<long long>&arr, long long key,Statistic& stats)
 
         if (key < arr[middle]) {
             right = middle - 1;
+            stats.totalComparisons++;
         }else {
             left = middle + 1;
+            stats.totalComparisons++;
         }
     }
     return -1;
 }
 long long binSearchRecursive(const vector<long long>&arr, long long key, long long left, long long right,Statistic& stats) {
-    stats.totalComparisons++;
-    if ( left > right) return -1;
+
+    if ( left > right) stats.totalComparisons++; return -1;
 
     long long middle = (right+ left) / 2;
-
-    stats.elementComparisons++;
-    stats.totalComparisons++;
 
     if (arr[middle] == key) return middle;
 
     stats.elementComparisons++;
     stats.totalComparisons++;
 
-    if (key < arr[middle])
-        return binSearchRecursive(arr, key, left, middle - 1,stats);
-    else
-        return binSearchRecursive(arr, key, middle + 1, right,stats);
+    if (key < arr[middle]) {
+        stats.totalComparisons++;
+        return binSearchRecursive(arr, key, left, middle - 1, stats);
+    }
+    else {
+        stats.totalComparisons++;
+        return binSearchRecursive(arr, key, middle + 1, right, stats);
+    }
 }
