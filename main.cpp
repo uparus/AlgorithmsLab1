@@ -3,32 +3,105 @@
 #include <vector>
 #include <algorithm>
 #include <fstream>
+#include <chrono>
 #include <functional>
 #include "search.h"
 #include "searchSource.h"
-using namespace std;
+#include "statistic.h"
+#include "searchSourceTime.h"
+//using namespace std;
+using namespace chrono;
+
+double measureTime(function<long long()> func);
 
 int main() {
     ofstream fout("result.txt");
     srand(time(NULL));
 
-    int SIZE = 6;
-    vector<vector<int>>matrix(5, vector<int>(SIZE, 0));
+    const long long SIZE = 10000000;
+    vector<long long>arr(SIZE);
+    initVector(arr);
 
-    initVector(matrix);
-    cout << "Matrix:\n";
-    printArray(matrix);
+    vector<long long> keys = {
+        arr[0],
+        arr[SIZE-1],
+        arr[SIZE/2],
+        -1
+    };
 
-    int key = rand() % 100;
-    cout << "key: " << key << endl;
+    Statistic stats;
 
-    pair<int,int> result = linearSearch(matrix, key);
-    cout << "\nLinear search\n";
-    cout << "First index encounter: " << result.first << " " << result.second;
+    vector<vector<double>>result(4, vector<double>(12,0));
+    int i = 0;
+    for (long long key : keys) {
+        int j = 0;
+        stats.reset();
+        long long linearIndex = searchLinear(arr, key, stats);
+        double linearTime = measureTime([&]() {
+            return searchLinear(arr, key);
+        });
+        result[i][j++] = stats.totalComparisons;
+        result[i][j++] = stats.elementComparisons;
+        result[i][j++] = linearTime;
 
-    pair<int, int> resultBarrier = linearSearchBarrier(matrix, key);
-    cout << "\nLinear barrier search\n";
-    cout << "First index encounter: " << resultBarrier.first << " " << resultBarrier.second << endl;
+        stats.reset();
+        long long barrierIndex = searchBarrier(arr, key, stats);
+        double barrierTime = measureTime([&]() {
+            return searchBarrier(arr, key);
+        });
+        result[i][j++] = stats.totalComparisons;
+        result[i][j++] = stats.elementComparisons;
+        result[i][j++] = linearTime;
 
+        stats.reset();
+        long long binaryIndex = binSearch(arr, key, stats);
+        double binaryTime = measureTime([&]() {
+            return binSearch(arr, key);
+        });
+        result[i][j++] = stats.totalComparisons;
+        result[i][j++] = stats.elementComparisons;
+        result[i][j++] = linearTime;
+
+        stats.reset();
+        long long recIndex = binSearchRecursive(arr, key, 0, SIZE - 1, stats);
+        double recTime = measureTime([&]() {
+            return binSearchRecursive(arr, key, 0, SIZE - 1);
+        });
+        result[i][j++] = stats.totalComparisons;
+        result[i][j++] = stats.elementComparisons;
+        result[i][j] = linearTime;
+        i++;
+    }
+
+    for (int i = 0; i < result.size(); i++) {
+        for (int j = 0; j < result[0].size(); j++) {
+            std::cout << result[i][j] << "\t";
+        }
+        fout << endl;
+    }
+
+    for (int i = 0; i < result.size(); i++) {
+        for (int j = 0; j < result[0].size(); j++) {
+            fout << result[i][j] << "\t";
+        }
+        fout << endl;
+    }
+    fout.close();
+    std::cout << "\nDone";
     return 0;
+}
+
+double measureTime(function<long long()> func)
+    {
+    double total = 0;
+
+    for (int i = 0; i < 10; i++) {
+        auto start = high_resolution_clock::now();
+        func();
+        auto end = high_resolution_clock::now();
+
+        total += duration_cast<milliseconds>(end - start).count();
+    }
+    int avg = total / 10;
+    return avg;
 }
