@@ -3,13 +3,15 @@
 #include <vector>
 #include <algorithm>
 #include <fstream>
+#include <iomanip>
 #include <chrono>
 #include <functional>
 #include "search.h"
 #include "searchSource.h"
 #include "statistic.h"
 #include "searchSourceTime.h"
-//using namespace std;
+
+using namespace std;
 using namespace chrono;
 
 double measureTime(function<long long()> func);
@@ -31,6 +33,7 @@ int main() {
 
     Statistic stats;
 
+    fout << fixed << setprecision(6);
     vector<vector<double>>result(4, vector<double>(12,0));
     int i = 0;
     for (long long key : keys) {
@@ -51,7 +54,7 @@ int main() {
         });
         result[i][j++] = stats.totalComparisons;
         result[i][j++] = stats.elementComparisons;
-        result[i][j++] = linearTime;
+        result[i][j++] = barrierTime;
 
         stats.reset();
         long long binaryIndex = binSearch(arr, key, stats);
@@ -60,7 +63,7 @@ int main() {
         });
         result[i][j++] = stats.totalComparisons;
         result[i][j++] = stats.elementComparisons;
-        result[i][j++] = linearTime;
+        result[i][j++] = binaryTime;
 
         stats.reset();
         long long recIndex = binSearchRecursive(arr, key, 0, SIZE - 1, stats);
@@ -69,17 +72,9 @@ int main() {
         });
         result[i][j++] = stats.totalComparisons;
         result[i][j++] = stats.elementComparisons;
-        result[i][j] = linearTime;
+        result[i][j] = recTime;
         i++;
     }
-
-    for (int i = 0; i < result.size(); i++) {
-        for (int j = 0; j < result[0].size(); j++) {
-            std::cout << result[i][j] << "\t";
-        }
-        fout << endl;
-    }
-
     for (int i = 0; i < result.size(); i++) {
         for (int j = 0; j < result[0].size(); j++) {
             fout << result[i][j] << "\t";
@@ -90,7 +85,6 @@ int main() {
     std::cout << "\nDone";
     return 0;
 }
-
 double measureTime(function<long long()> func)
     {
     double total = 0;
@@ -100,8 +94,7 @@ double measureTime(function<long long()> func)
         func();
         auto end = high_resolution_clock::now();
 
-        total += duration_cast<milliseconds>(end - start).count();
+        total += duration<double>(end - start).count();
     }
-    int avg = total / 10;
-    return avg;
+    return total / 10.0;
 }

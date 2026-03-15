@@ -7,7 +7,7 @@
 using namespace std;
 
 long long searchLinear(const vector<long long>&arr, long long key,Statistic& stats);
-long long searchBarrier(vector<long long>arr,long long key,Statistic& stats);
+long long searchBarrier(const vector<long long>&arr,long long key,Statistic& stats);
 void printArray(const vector<long long>&arr);
 void initVector(vector<long long>& arr);
 long long binSearch(const vector<long long>&arr,long long key,Statistic& stats);

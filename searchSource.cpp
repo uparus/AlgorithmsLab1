@@ -16,17 +16,21 @@ long long searchLinear(const vector<long long>&arr, long long key,Statistic& sta
     }
     return -1;
 }
-long long searchBarrier(vector<long long>arr, long long key,Statistic& stats) {
-    arr.push_back(key);
+long long searchBarrier(const vector<long long>&arr, long long key,Statistic& stats) {
+    vector<long long> barrier = arr;
+    barrier.push_back(key);
     long long i = 0;
 
-    while (arr[i] != key) {
-        i++;
+    while (barrier[i] != key) {
         stats.elementComparisons++;
         stats.totalComparisons++;
+        i++;
     }
 
-    if (i == arr.size() - 1) return -1;
+    stats.elementComparisons++;
+    stats.totalComparisons++;
+
+    if (i == barrier.size() - 1) return -1;
 
     return i;
 }
@@ -47,10 +51,10 @@ long long binSearch(const vector<long long>&arr, long long key,Statistic& stats)
     while (left <= right) {
         long long middle = (left+right)/2;
 
-        if (arr[middle] == key) return middle;
-
         stats.totalComparisons++;
         stats.elementComparisons++;
+
+        if (arr[middle] == key) return middle;
 
         if (key < arr[middle]) {
             right = middle - 1;
@@ -63,22 +67,24 @@ long long binSearch(const vector<long long>&arr, long long key,Statistic& stats)
     return -1;
 }
 long long binSearchRecursive(const vector<long long>&arr, long long key, long long left, long long right,Statistic& stats) {
-
-    if ( left > right) stats.totalComparisons++; return -1;
+    stats.totalComparisons++;
+    if ( left > right) {
+        return -1;
+    }
 
     long long middle = (right+ left) / 2;
-
-    if (arr[middle] == key) return middle;
 
     stats.elementComparisons++;
     stats.totalComparisons++;
 
+    if (arr[middle] == key) return middle;
+
+    stats.totalComparisons++;
+
     if (key < arr[middle]) {
-        stats.totalComparisons++;
         return binSearchRecursive(arr, key, left, middle - 1, stats);
     }
     else {
-        stats.totalComparisons++;
         return binSearchRecursive(arr, key, middle + 1, right, stats);
     }
 }

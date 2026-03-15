@@ -11,12 +11,13 @@ long long searchLinear(const vector<long long>&arr, long long key) {
     }
     return -1;
 }
-long long searchBarrier(vector<long long>arr, long long key ){
-    arr.push_back(key);
+long long searchBarrier(const vector<long long>&arr, long long key ){
+    vector<long long> barrier = arr;
+    barrier.push_back(key);
     long long i = 0;
 
-    while (arr[i] != key) i++;
-    if (i == arr.size() - 1) return -1;
+    while (barrier[i] != key) i++;
+    if (i == barrier.size() - 1) return -1;
 
     return i;
 }
