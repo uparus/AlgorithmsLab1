@@ -1,0 +1,59 @@
+#include <iostream>
+using namespace std;
+#include<string>
+#include<fstream>
+struct Pos {
+  int row;
+  int col;
+  Pos() :row(-1), col(-1) {}
+  Pos(int r, int c) : row(r), col(c) {}
+};
+int** fillArray(const string& filename,int& row, int& col);
+Pos BinarySearch(int** array, int element, int row, int col);
+int main() {
+    int row, col;
+  string filename = "array.txt";
+    int element;
+    cout << "input element: " << endl;
+    cin >> element;
+    int** array = fillArray(filename, row, col);
+    Pos result = BinarySearch(array, element, row, col);
+    cout << "Result: " << endl;
+    cout << result.row << " " << result.col << endl;
+    for (int i = 0; i < row; i++) {
+        delete[]array[i];
+    }
+    delete[]array;
+}
+int** fillArray(const string& filename, int& row, int& col) {
+  ifstream file(filename);
+  file >> row >> col;
+  int** array = new int* [row];
+  for (int i = 0; i < row; i++) {
+    array[i] = new int[col];
+    for (int j = 0; j < col; j++) {
+      file >> array[i][j];
+    }
+  }
+  file.close();
+  return array;
+}
+Pos BinarySearch(int** array, int element, int row, int col) {
+    int left = 0, right = row * col - 1;
+    while (left <= right) {
+        int mid = left+(right - left)/ 2;
+        int midRow = mid / col;
+        int midCol = mid % col;
+        int midValue = array[midRow][midCol];
+        if (midValue == element) {
+            return Pos(midRow, midCol);
+        }
+        else if (midValue < element) {
+            left = mid + 1;
+        }
+        else {
+            right = mid - 1;
+        }
+    }
+    return Pos();
+}
